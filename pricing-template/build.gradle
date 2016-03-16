@@ -1,0 +1,74 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+apply plugin: 'java'
+
+ext {
+    major = 0
+    minor = 0
+    patch = 0
+
+    adapterName = rootProject.name
+    replacements = [
+            adapterName: adapterName
+    ]
+
+}
+
+version = major + "." + minor + "." + patch
+
+repositories {
+    mavenCentral()
+    maven {
+        //TODO: change to public facing client artifactory
+        url "http://artifactory.caplin.com:8081/artifactory/caplin-release/"
+    }
+}
+
+dependencies {
+    compile group: 'com.caplin.platform.components.datasource', name: 'datasource-java', version: '6.2.+', classifier: 'jar-with-dependencies', {
+        transitive = false
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.caplin.template.AdapterTemplate',
+                "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
+        )
+    }
+}
+
+
+//TODO: add config only switch
+task createKit(type: Zip, dependsOn: jar) {
+    archiveName = adapterName + "-" + version + ".zip"
+    def topDirName = archiveName.substring(0, archiveName.lastIndexOf("."))
+
+    into("${topDirName}") {
+        from "${project.projectDir}/blade"
+        include 'blade_config/bootstrap.conf'
+        if ( !project.hasProperty("configOnly") ) {
+            include 'DataSource/bin/start-jar.sh'
+        }
+        filter(ReplaceTokens, tokens: replacements)
+    }
+
+    into("${topDirName}") {
+        from "${project.projectDir}/blade"
+        exclude 'blade_config/bootstrap.conf'
+        if ( !project.hasProperty("configOnly") ) {
+            exclude 'DataSource/bin/start-jar.sh'
+        } else {
+            exclude 'DataSource'
+        }
+    }
+
+    if ( !project.hasProperty("configOnly") ) {
+        into("${topDirName}/DataSource/lib") {
+            from([project.jar.outputs, configurations.compile])
+        }
+    }
+}
+
+assemble.dependsOn(createKit)

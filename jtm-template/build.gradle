@@ -1,0 +1,52 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+apply plugin: 'java'
+
+ext {
+    major = 0
+        minor = 0
+        patch = 0
+
+    moduleName = rootProject.name
+    replacements = [
+        moduleName: moduleName
+    ]
+}
+
+version = major + "." + minor + "." + patch
+
+
+repositories {
+    mavenCentral()
+        maven {
+            //TODO: change to public facing client artifactory
+            url "http://artifactory.caplin.com:8081/artifactory/caplin-release/"
+        }
+}
+
+dependencies {
+    compile group: 'com.caplin.platform.components', name: 'TransformerModule', version: '6.2.+', {
+        transitive = false
+    }
+}
+
+jar {
+    version = null
+}
+
+task createKit(type: Zip, dependsOn: [jar, javadoc]) {
+    archiveName = moduleName + "-" + version + ".zip"
+    def topDirName = archiveName.substring(0, archiveName.lastIndexOf("."))
+
+    into ("${topDirName}") {
+        from "${project.projectDir}/blade"
+        rename 'module.conf', "${moduleName}.conf"
+        filter(ReplaceTokens, tokens: replacements)
+    }
+
+    into ("${topDirName}/Transformer/lib/java") {
+        from([project.jar.outputs, configurations.compile])
+    }
+}
+
+assemble.dependsOn(createKit)
