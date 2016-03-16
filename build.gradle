@@ -1,0 +1,42 @@
+apply plugin: 'java'
+
+ext {
+    major = 0
+    minor = 0
+    patch = 0
+
+    datasrcId       = 991
+    adapterName     = "TemplateAdapter"
+
+    pricingPrefix   = "/TEMPLATE/PRICING"
+}
+
+version = major + "." + minor + "." + patch
+
+repositories {
+    mavenCentral()
+    maven { url "http://artifactory.caplin.com:8081/artifactory/caplin-release/" }
+    //TODO: add public artifactory and credentials
+//    maven {
+//        credentials {
+//            username ''
+//            password ''
+//        }
+//        url "http://artifactory.caplin.com/artifactory/client-integration"
+//    }
+}
+
+dependencies {
+    compile group: 'com.caplin.platform.components.datasource', name: 'datasource-java', version: '6.2.+', {transitive=false}
+}
+
+task createKit(type: Zip, dependsOn: jar) {
+    def topDirName = archiveName.substring(0, archiveName.lastIndexOf("."))
+
+    into ("${topDirName}") {
+        from "${project.projectDir}/Blade"
+    }
+    into ("${topDirName}/DataSource/lib") {
+        from project.jar.archivePath
+    }
+}
