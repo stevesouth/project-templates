@@ -7,6 +7,7 @@ import com.caplin.datasource.publisher.ActivePublisher;
 import com.caplin.datasource.publisher.DataProvider;
 import com.caplin.datasource.publisher.DiscardEvent;
 import com.caplin.datasource.publisher.RequestEvent;
+import com.caplin.template.CapConfig;
 
 import java.util.logging.Level;
 

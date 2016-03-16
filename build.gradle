@@ -1,3 +1,7 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+import org.apache.tools.ant.filters.FixCrLfFilter
+
+
 apply plugin: 'java'
 
 ext {
@@ -9,6 +13,14 @@ ext {
     adapterName     = "TemplateAdapter"
 
     pricingPrefix   = "/TEMPLATE/PRICING"
+
+    replacements = [
+        capConfDatasrcId: String.valueOf(datasrcId),
+        capConfAdapterName: adapterName,
+        capConfPricingPattern: pricingPrefix
+    ]
+
+
 }
 
 version = major + "." + minor + "." + patch
@@ -34,9 +46,21 @@ task createKit(type: Zip, dependsOn: jar) {
     def topDirName = archiveName.substring(0, archiveName.lastIndexOf("."))
 
     into ("${topDirName}") {
-        from "${project.projectDir}/Blade"
+        from "${project.projectDir}/blade"
+        include 'blade_config/bootstrap.conf'
+        filter(ReplaceTokens, tokens: replacements)
     }
+
+    into ("${topDirName}") {
+        from "${project.projectDir}/blade"
+        exclude 'blade_config/bootstrap.conf'
+    }
+
     into ("${topDirName}/DataSource/lib") {
         from project.jar.archivePath
+    }
+
+    into ("${topDirName}/DataSource/lib") {
+        from configurations.compile
     }
 }
