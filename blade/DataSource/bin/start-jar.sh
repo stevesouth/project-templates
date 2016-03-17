@@ -10,7 +10,7 @@
 # Returns the process id of the Java process.
 #
 
-BLADENAME=@capConfAdapterName@
+BLADENAME=@adapterName@
 
 if [ "$1" = "CONFREADER" ]; then
    shift
@@ -28,6 +28,6 @@ if [ $confreading = 1 ]; then
    java -jar "$jar" "$@"
    exit $?
 else
-   java -cp "$classpath" -jar "$jar" > "$LOGDIR"/java-$BLADENAME.log 2>&1 &
+   java -cp "$classpath" -jar "$jar" "$@" > "$LOGDIR"/java-$BLADENAME.log 2>&1 &
    echo $!
 fi

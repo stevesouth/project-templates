@@ -1,7 +1,6 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.apache.tools.ant.filters.FixCrLfFilter
 
-
 apply plugin: 'java'
 apply plugin: 'application'
 
@@ -10,18 +9,11 @@ ext {
     minor = 0
     patch = 0
 
-    datasrcId       = 991
     adapterName     = rootProject.name
 
-    pricingPrefix   = "/TEMPLATE/PRICING"
-
     replacements = [
-        capConfDatasrcId: String.valueOf(datasrcId),
-        capConfAdapterName: adapterName,
-        capConfPricingPattern: pricingPrefix
+        adapterName: adapterName,
     ]
-
-
 }
 
 version = major + "." + minor + "." + patch
@@ -41,7 +33,6 @@ repositories {
 
 dependencies {
     compile group: 'com.caplin.platform.components.datasource', name: 'datasource-java', version: '6.2.+', classifier: 'jar-with-dependencies', {transitive=false}
-
 }
 
 jar {
@@ -79,5 +70,3 @@ task createKit(type: Zip, dependsOn: jar) {
         from configurations.compile
     }
 }
-
-mainClassName = "com.caplin.template.AdapterTemplate"
