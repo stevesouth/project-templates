@@ -56,11 +56,7 @@ task createKit(type: Zip, dependsOn: jar) {
     }
 
     into("${topDirName}/DataSource/lib") {
-        from project.jar.archivePath
-    }
-
-    into("${topDirName}/DataSource/lib") {
-        from configurations.compile
+        from([project.jar.outputs, configurations.compile])
     }
 }
 
