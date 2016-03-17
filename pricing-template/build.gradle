@@ -11,7 +11,6 @@ ext {
     replacements = [
             adapterName: adapterName
     ]
-
 }
 
 version = major + "." + minor + "." + patch
@@ -39,7 +38,6 @@ jar {
     }
 }
 
-
 task createKit(type: Zip, dependsOn: jar) {
     archiveName = adapterName + "-" + version + ".zip"
     def topDirName = archiveName.substring(0, archiveName.lastIndexOf("."))
@@ -47,9 +45,7 @@ task createKit(type: Zip, dependsOn: jar) {
     into("${topDirName}") {
         from "${project.projectDir}/blade"
         include 'blade_config/bootstrap.conf'
-        if ( !project.hasProperty("configOnly") ) {
-            include 'DataSource/bin/start-jar.sh'
-        }
+        include 'DataSource/bin/start-jar.sh'
         filter(ReplaceTokens, tokens: replacements)
     }
 
@@ -59,12 +55,9 @@ task createKit(type: Zip, dependsOn: jar) {
         exclude 'DataSource/bin/start-jar.sh'
     }
 
-    if ( !project.hasProperty("configOnly") ) {
-        into("${topDirName}/DataSource/lib") {
-            from([project.jar.outputs, configurations.compile])
-        }
+    into("${topDirName}/DataSource/lib") {
+        from([project.jar.outputs, configurations.compile])
     }
-    
 }
 
 assemble.dependsOn(createKit)
