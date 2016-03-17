@@ -7,8 +7,8 @@
 
 # Caplin Pricing Adapter Template
 
-clone repo
-change the project/adapter name in settings.gradle
-run "gradle assemble"
-
-deploy the zip file created in `build/distributions/` into your Deployment Framework
+1. clone repo
+2. change the project/adapter name in settings.gradle
+3. run "gradle assemble"
+4. deploy the zip file created in `build/distributions/` into your Deployment Framework
+5. start the deployment
