@@ -40,7 +40,6 @@ jar {
 }
 
 
-//TODO: add config only switch
 task createKit(type: Zip, dependsOn: jar) {
     archiveName = adapterName + "-" + version + ".zip"
     def topDirName = archiveName.substring(0, archiveName.lastIndexOf("."))
@@ -57,11 +56,7 @@ task createKit(type: Zip, dependsOn: jar) {
     into("${topDirName}") {
         from "${project.projectDir}/blade"
         exclude 'blade_config/bootstrap.conf'
-        if ( !project.hasProperty("configOnly") ) {
-            exclude 'DataSource/bin/start-jar.sh'
-        } else {
-            exclude 'DataSource'
-        }
+        exclude 'DataSource/bin/start-jar.sh'
     }
 
     if ( !project.hasProperty("configOnly") ) {
@@ -69,6 +64,7 @@ task createKit(type: Zip, dependsOn: jar) {
             from([project.jar.outputs, configurations.compile])
         }
     }
+    
 }
 
 assemble.dependsOn(createKit)
