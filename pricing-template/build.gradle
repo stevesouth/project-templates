@@ -18,16 +18,11 @@ version = major + "." + minor + "." + patch
 
 repositories {
     mavenCentral()
-    maven {
-        //TODO: change to public facing client artifactory
-        url "http://artifactory.caplin.com:8081/artifactory/caplin-release/"
-    }
 }
 
 dependencies {
-    compile group: 'com.caplin.platform.components.datasource', name: 'datasource-java', version: '6.2.+', classifier: 'jar-with-dependencies', {
-        transitive = false
-    }
+    //TODO: put the datasource with dependencies jar into the libs folder of the project
+    compile fileTree(dir: 'libs', include: '*.jar')
 }
 
 jar {
@@ -64,7 +59,7 @@ task createKit(type: Zip, dependsOn: jar) {
             from([project.jar.outputs, configurations.compile])
         }
     }
-    
+
 }
 
 assemble.dependsOn(createKit)
