@@ -9,20 +9,27 @@ ext {
 
     adapterName = rootProject.name
     replacements = [
-            adapterName: adapterName
+            adapterName: adapterName,
     ]
 
 }
 
 version = major + "." + minor + "." + patch
 
+
 repositories {
     mavenCentral()
+    maven { 
+        credentials {
+            username "user"         //insert your caplin artifactory username here
+            password "secret"       //insert your caplin artifactory password here
+        }
+        url "http://clientartifactory.caplin.com/artifactory/caplin-artifactory-caplin-qa-cache" 
+    }
 }
 
 dependencies {
-    //TODO: put the datasource with dependencies jar into the libs folder of the project
-    compile fileTree(dir: 'libs', include: '*.jar')
+    compile(group: 'com.caplin.platform.components.datasource', name: 'datasource-java', version: '6.2.+') { transitive = false }
 }
 
 jar {
@@ -42,7 +49,7 @@ task createKit(type: Zip, dependsOn: jar) {
     into("${topDirName}") {
         from "${project.projectDir}/blade"
         include 'blade_config/bootstrap.conf'
-        if ( !project.hasProperty("configOnly") ) {
+        if (!project.hasProperty("configOnly")) {
             include 'DataSource/bin/start-jar.sh'
         }
         filter(ReplaceTokens, tokens: replacements)
@@ -54,12 +61,39 @@ task createKit(type: Zip, dependsOn: jar) {
         exclude 'DataSource/bin/start-jar.sh'
     }
 
-    if ( !project.hasProperty("configOnly") ) {
+    if (!project.hasProperty("configOnly")) {
         into("${topDirName}/DataSource/lib") {
             from([project.jar.outputs, configurations.compile])
         }
     }
 
 }
+
+task setupWorkingDirectory(type: Copy) {
+
+    from("${project.projectDir}/blade") {
+        include 'blade_config/bootstrap.conf'
+        filter(ReplaceTokens, tokens: replacements)
+    }
+    from("${project.projectDir}/blade") {
+        exclude 'blade_config/bootstrap.conf'
+        exclude 'DataSource/bin'
+        exclude 'Liberator'
+    }
+    into("${buildDir}/env")
+}
+
+task createEnvironmentConfig << {
+    String thisLeg = (project.hasProperty("thisLeg") ? project.thisLeg : "1")
+
+    String content =    "define THIS_LEG                            ${thisLeg}\n" +
+                        "define LIBERATOR${thisLeg}_HOST            ${(project.hasProperty("liberatorHost") ? project.liberatorHost : "localhost")}\n" +
+                        "define LIBERATOR${thisLeg}_DATASRCPORT     ${(project.hasProperty("liberatorDsPort") ? project.liberatorDsPort : "15001")}"
+
+
+    new File(setupWorkingDirectory.getDestinationDir().getAbsolutePath() + "/blade_config/environment-ide.conf").text=content
+}
+
+setupWorkingDirectory.finalizedBy createEnvironmentConfig
 
 assemble.dependsOn(createKit)
